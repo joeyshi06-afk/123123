@@ -226,7 +226,7 @@ const App: React.FC = () => {
                           </div>
                       )}
                       {/* Gloss Overlay */}
-                      <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/20 pointer-events-none" />
+                      
                   </div>
 
                   {/* Signature Input Area */}
