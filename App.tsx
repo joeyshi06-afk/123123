@@ -14,9 +14,20 @@ const App: React.FC = () => {
   const inputRef = useRef({ x: 0, y: 0, isDetected: false });
   
   // Image Upload State
-  const [userImages, setUserImages] = useState<string[]>([]);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  // 固定照片（从 public/photos 读取）
+// 固定照片（从 public/photos 读取）
+// ⚠️ public 目录下的文件，路径要用 /photos/xxx.png
+const fixedImages: string[] = [
+  "/photos/1.png",
+  "/photos/2.png",
+  "/photos/3.png",
+  "/photos/4.png",
+  "/photos/5.png",
+  "/photos/6.png",
+  "/photos/7.png",
+  "/photos/8.png",
+];
+
 
   // Signature Modal State
   const [isSignatureOpen, setIsSignatureOpen] = useState(false);
@@ -64,24 +75,6 @@ const App: React.FC = () => {
       }
       setIsSignatureOpen(true);
   };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files && e.target.files.length > 0) {
-          setIsProcessing(true);
-          
-          // 1. Immediately disperse the tree (Chaos State) behind the loading screen
-          setTargetMix(0);
-          
-          // Defer processing to next tick to allow React to render the loading screen first
-          setTimeout(() => {
-              const files = Array.from(e.target.files!).slice(0, 30); // Limit to 30
-              const urls = files.map(file => URL.createObjectURL(file));
-              
-              setUserImages(prev => {
-                  // Revoke old URLs to prevent memory leaks
-                  prev.forEach(url => URL.revokeObjectURL(url));
-                  return urls;
-              });
 
               // Reset input
               if (fileInputRef.current) fileInputRef.current.value = '';
@@ -135,16 +128,6 @@ const App: React.FC = () => {
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
       
-      {/* Hidden File Input */}
-      <input 
-        type="file" 
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        accept="image/*"
-        multiple
-        className="hidden"
-      />
-
       {/* LOADING OVERLAY */}
       {isProcessing && (
           <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md transition-all duration-500 animate-in fade-in">
