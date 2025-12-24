@@ -40,9 +40,9 @@ const [activePhotoUrl, setActivePhotoUrl] = useState<string | null>(null);
 const [showCamera, setShowCamera] = useState(true);
 
   // Wrap in useCallback to prevent new function creation on every render
-   handleGesture = useCallback((data: HandGesture) => {
+const handleGesture = useCallback((data: HandGesture) => {
     if (data.isDetected) {
-         newTarget = data.isOpen ? 0 : 1;
+        const newTarget = data.isOpen ? 0 : 1;
         setTargetMix(prev => {
             if (prev !== newTarget) return newTarget;
             return prev;
@@ -61,40 +61,6 @@ const [showCamera, setShowCamera] = useState(true);
 
   const toggleState = () => {
       setTargetMix(prev => prev === 1 ? 0 : 1);
-  };
-
-  const handleUploadClick = () => {
-      fileInputRef.current?.click();
-  };
-
-  const handleSignatureClick = () => {
-      // Pick a random photo if available, else null (placeholder)
-      if (userImages.length > 0) {
-          const randomImg = userImages[Math.floor(Math.random() * userImages.length)];
-          setActivePhotoUrl(randomImg);
-      } else {
-          setActivePhotoUrl(null);
-      }
-      setIsSignatureOpen(true);
-  };
-
-              // Reset input
-              if (fileInputRef.current) fileInputRef.current.value = '';
-
-              // Keep loader visible for a moment to cover the texture upload stutter
-              setTimeout(() => {
-                  setIsProcessing(false);
-                  
-                  // 2. Trigger the "Ritual" Assembly Animation
-                  // Wait a brief moment after loader vanishes so user sees the scattered photos,
-                  // then fly them into position.
-                  setTimeout(() => {
-                      setTargetMix(1);
-                  }, 800);
-
-              }, 1200); 
-          }, 50);
-      }
   };
 
   // Unified Icon Button Style - Premium Silver Glassmorphism (Circular)
@@ -129,32 +95,6 @@ const [showCamera, setShowCamera] = useState(true);
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
-      
-      {/* LOADING OVERLAY */}
-      {isProcessing && (
-          <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md transition-all duration-500 animate-in fade-in">
-              <div className="relative w-16 h-16 mb-6">
-                  {/* Outer Ring */}
-                  <div className="absolute inset-0 border-2 border-t-[#d4af37] border-r- border-b-[#d4af37] border-l- rounded-full animate-spin"></div>
-                  {/* Inner Ring */}
-                  <div className="absolute inset-2 border-2 border-t- border-r-white/30 border-b- border-l-white/30 rounded-full animate-spin-reverse"></div>
-                  {/* Center Star */}
-                  <div className="absolute inset-0 flex items-center justify-center text-[#d4af37] text-xl animate-pulse">✦</div>
-              </div>
-              <div className="text-[#d4af37] font-luxury tracking-[0.25em] text-xs uppercase animate-pulse">
-                  圣诞树装饰中...
-              </div>
-              <style>{`
-                @keyframes spin-reverse {
-                    from { transform: rotate(360deg); }
-                    to { transform: rotate(0deg); }
-                }
-                .animate-spin-reverse {
-                    animation: spin-reverse 2s linear infinite;
-                }
-              `}</style>
-          </div>
-      )}
 
       {/* CENTER TITLE - Ethereal Silver Script */}
       {/* Layer: z-0 (Background layer, behind the tree) */}
