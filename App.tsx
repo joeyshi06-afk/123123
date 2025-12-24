@@ -14,33 +14,20 @@ const App: React.FC = () => {
   const inputRef = useRef({ x: 0, y: 0, isDetected: false });
   
   // Image Upload State
-  // 固定照片（从 public/photos 读取）
-// 固定照片（从 public/photos 读取）
-// ⚠️ public 目录下的文件，路径要用 /photos/xxx.png
-const fixedImages: string[] = [
-  "/photos/1.png",
-  "/photos/2.png",
-  "/photos/3.png",
-  "/photos/4.png",
-  "/photos/5.png",
-  "/photos/6.png",
-  "/photos/7.png",
-  "/photos/8.png",
-  "/photos/9.png",
-  "/photos/10.png",
-];
-
+  const [userImages, setUserImages] = useState<string[]>([]);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Signature Modal State
-const [isSignatureOpen, setIsSignatureOpen] = useState(false);
-const [signatureText, setSignatureText] = useState("");
-const [activePhotoUrl, setActivePhotoUrl] = useState<string | null>(null);
+  const [isSignatureOpen, setIsSignatureOpen] = useState(false);
+  const [signatureText, setSignatureText] = useState("");
+  const [activePhotoUrl, setActivePhotoUrl] = useState<string | null>(null);
 
   // Camera Gui Visibility
-const [showCamera, setShowCamera] = useState(true);
+  const [showCamera, setShowCamera] = useState(true);
 
   // Wrap in useCallback to prevent new function creation on every render
-const handleGesture = useCallback((data: HandGesture) => {
+  const handleGesture = useCallback((data: HandGesture) => {
     if (data.isDetected) {
         const newTarget = data.isOpen ? 0 : 1;
         setTargetMix(prev => {
@@ -61,6 +48,58 @@ const handleGesture = useCallback((data: HandGesture) => {
 
   const toggleState = () => {
       setTargetMix(prev => prev === 1 ? 0 : 1);
+  };
+
+  const handleUploadClick = () => {
+      fileInputRef.current?.click();
+  };
+
+  const handleSignatureClick = () => {
+      // Pick a random photo if available, else null (placeholder)
+      if (userImages.length > 0) {
+          const randomImg = userImages[Math.floor(Math.random() * userImages.length)];
+          setActivePhotoUrl(randomImg);
+      } else {
+          setActivePhotoUrl(null);
+      }
+      setIsSignatureOpen(true);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      if (e.target.files && e.target.files.length > 0) {
+          setIsProcessing(true);
+          
+          // 1. Immediately disperse the tree (Chaos State) behind the loading screen
+          setTargetMix(0);
+          
+          // Defer processing to next tick to allow React to render the loading screen first
+          setTimeout(() => {
+              const files = Array.from(e.target.files!).slice(0, 30); // Limit to 30
+              const urls = files.map(file => URL.createObjectURL(file));
+              
+              setUserImages(prev => {
+                  // Revoke old URLs to prevent memory leaks
+                  prev.forEach(url => URL.revokeObjectURL(url));
+                  return urls;
+              });
+
+              // Reset input
+              if (fileInputRef.current) fileInputRef.current.value = '';
+
+              // Keep loader visible for a moment to cover the texture upload stutter
+              setTimeout(() => {
+                  setIsProcessing(false);
+                  
+                  // 2. Trigger the "Ritual" Assembly Animation
+                  // Wait a brief moment after loader vanishes so user sees the scattered photos,
+                  // then fly them into position.
+                  setTimeout(() => {
+                      setTargetMix(1);
+                  }, 800);
+
+              }, 1200); 
+          }, 50);
+      }
   };
 
   // Unified Icon Button Style - Premium Silver Glassmorphism (Circular)
@@ -95,6 +134,42 @@ const handleGesture = useCallback((data: HandGesture) => {
 
   return (
     <div className="relative w-full h-screen bg-black overflow-hidden">
+      
+      {/* Hidden File Input */}
+      <input 
+        type="file" 
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept="image/*"
+        multiple
+        className="hidden"
+      />
+
+      {/* LOADING OVERLAY */}
+      {isProcessing && (
+          <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md transition-all duration-500 animate-in fade-in">
+              <div className="relative w-16 h-16 mb-6">
+                  {/* Outer Ring */}
+                  <div className="absolute inset-0 border-2 border-t-[#d4af37] border-r-transparent border-b-[#d4af37] border-l-transparent rounded-full animate-spin"></div>
+                  {/* Inner Ring */}
+                  <div className="absolute inset-2 border-2 border-t-transparent border-r-white/30 border-b-transparent border-l-white/30 rounded-full animate-spin-reverse"></div>
+                  {/* Center Star */}
+                  <div className="absolute inset-0 flex items-center justify-center text-[#d4af37] text-xl animate-pulse">✦</div>
+              </div>
+              <div className="text-[#d4af37] font-luxury tracking-[0.25em] text-xs uppercase animate-pulse">
+                  圣诞树装饰中...
+              </div>
+              <style>{`
+                @keyframes spin-reverse {
+                    from { transform: rotate(360deg); }
+                    to { transform: rotate(0deg); }
+                }
+                .animate-spin-reverse {
+                    animation: spin-reverse 2s linear infinite;
+                }
+              `}</style>
+          </div>
+      )}
 
       {/* CENTER TITLE - Ethereal Silver Script */}
       {/* Layer: z-0 (Background layer, behind the tree) */}
@@ -105,7 +180,7 @@ const handleGesture = useCallback((data: HandGesture) => {
                 // Silver Metallic Gradient
                 background: 'linear-gradient(to bottom, #ffffff 20%, #e8e8e8 50%, #b0b0b0 90%)',
                 WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: '',
+                WebkitTextFillColor: 'transparent',
                 // 3D Depth Shadows + Glow
                 filter: 'drop-shadow(0px 5px 5px rgba(0,0,0,0.8)) drop-shadow(0px 0px 20px rgba(255,255,255,0.4))'
             }}
@@ -121,7 +196,7 @@ const handleGesture = useCallback((data: HandGesture) => {
             mixFactor={targetMix}
             colors={colors} 
             inputRef={inputRef} 
-            userImages={fixedImages}
+            userImages={userImages}
             signatureText={signatureText}
         />
       </div>
@@ -151,7 +226,7 @@ const handleGesture = useCallback((data: HandGesture) => {
                           </div>
                       )}
                       {/* Gloss Overlay */}
-                      
+                      <div className="absolute inset-0 bg-gradient-to-tr from-white/0 via-white/5 to-white/20 pointer-events-none" />
                   </div>
 
                   {/* Signature Input Area */}
@@ -162,7 +237,7 @@ const handleGesture = useCallback((data: HandGesture) => {
                         placeholder="Sign here..."
                         value={signatureText}
                         onChange={(e) => setSignatureText(e.target.value)}
-                        className="w-full text-center bg- border-none outline-none font-script text-3xl md:text-4xl text-[#1a1a1a] placeholder:text-gray-300/50"
+                        className="w-full text-center bg-transparent border-none outline-none font-script text-3xl md:text-4xl text-[#1a1a1a] placeholder:text-gray-300/50"
                         style={{ transform: 'translateY(-5px) rotate(-1deg)' }}
                         maxLength={20}
                       />
@@ -183,7 +258,7 @@ const handleGesture = useCallback((data: HandGesture) => {
 
       {/* TOP RIGHT - CONTROLS */}
       {/* Responsive positioning: Flex Row on Mobile, Flex Col on Desktop */}
-      <div className={`absolute top-6 right-6 md:top-10 md:right-10 z-30 pointer-events-auto flex flex-row md:flex-col items-center md:items-end gap-3 md:gap-4 transition-opacity duration-500 ${isSignatureOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}>
+      <div className={`absolute top-6 right-6 md:top-10 md:right-10 z-30 pointer-events-auto flex flex-row md:flex-col items-center md:items-end gap-3 md:gap-4 transition-opacity duration-500 ${isSignatureOpen || isProcessing ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
           
           {/* 1. Camera Toggle */}
           <button 
@@ -203,6 +278,28 @@ const handleGesture = useCallback((data: HandGesture) => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />
                   </svg>
               )}
+          </button>
+
+          {/* 2. Upload Photos */}
+          <button 
+            onClick={handleUploadClick}
+            className={iconButtonClass}
+            title="上传照片"
+          >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor" className="w-5 h-5 md:w-6 md:h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909m-18 3.75h16.5a1.5 1.5 0 001.5-1.5V6a1.5 1.5 0 00-1.5-1.5H3.75A1.5 1.5 0 002.25 6v12a1.5 1.5 0 001.5 1.5zm10.5-11.25h.008v.008h-.008V8.25zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z" />
+              </svg>
+          </button>
+
+          {/* 3. Polaroid Signature */}
+          <button 
+            onClick={handleSignatureClick}
+            className={iconButtonClass}
+            title="拍立得签名"
+          >
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.2} stroke="currentColor" className="w-5 h-5 md:w-6 md:h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+              </svg>
           </button>
 
           {/* 4. Disperse/Assemble Toggle */}

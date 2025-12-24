@@ -242,7 +242,7 @@ const SceneController: React.FC<{
 const SceneContent: React.FC<ExperienceProps> = ({ mixFactor, colors, inputRef, userImages, signatureText }) => {
   const groupRef = useRef<THREE.Group>(null);
   
-  const photoCount = (userImages && userImages.length > 0) ? userImages.length : 1;
+  const photoCount = (userImages && userImages.length > 0) ? userImages.length : 10;
 
   return (
     <>
@@ -254,8 +254,10 @@ const SceneContent: React.FC<ExperienceProps> = ({ mixFactor, colors, inputRef, 
       <pointLight position={[10, -5, 10]} intensity={1.2} color="#ff0000" />
       <pointLight position={[0, 10, 10]} intensity={0.5} color="#ffffff" />
       
-     <Environment files="/hdri/potsdamer_platz_1k.hdr" background={false} />
-    
+      <Environment 
+        files='public/hdri/potsdamer_platz_1k.hdr'
+        background={false} 
+      />
       <Stars radius={100} depth={50} count={3000} factor={4} saturation={0} fade speed={1} />
 
       <Snow mixFactor={mixFactor} />
