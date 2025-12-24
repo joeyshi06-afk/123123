@@ -183,7 +183,7 @@ const handleGesture = useCallback((data: HandGesture) => {
 
       {/* TOP RIGHT - CONTROLS */}
       {/* Responsive positioning: Flex Row on Mobile, Flex Col on Desktop */}
-      <div className={`absolute top-6 right-6 md:top-10 md:right-10 z-30 pointer-events-auto flex flex-row md:flex-col items-center md:items-end gap-3 md:gap-4 transition-opacity duration-500 ${isSignatureOpen || isProcessing ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+      <div className={`absolute top-6 right-6 md:top-10 md:right-10 z-30 pointer-events-auto flex flex-row md:flex-col items-center md:items-end gap-3 md:gap-4 transition-opacity duration-500 ${isSignatureOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}>
           
           {/* 1. Camera Toggle */}
           <button 
