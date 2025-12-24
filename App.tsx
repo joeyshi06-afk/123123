@@ -32,12 +32,12 @@ const fixedImages: string[] = [
 
 
   // Signature Modal State
-   [isSignatureOpen, setIsSignatureOpen] = useState(false);
-   [signatureText, setSignatureText] = useState("");
-   [activePhotoUrl, setActivePhotoUrl] = useState<string | null>(null);
+const [isSignatureOpen, setIsSignatureOpen] = useState(false);
+const [signatureText, setSignatureText] = useState("");
+const [activePhotoUrl, setActivePhotoUrl] = useState<string | null>(null);
 
   // Camera Gui Visibility
-   [showCamera, setShowCamera] = useState(true);
+const [showCamera, setShowCamera] = useState(true);
 
   // Wrap in useCallback to prevent new function creation on every render
    handleGesture = useCallback((data: HandGesture) => {
@@ -181,7 +181,7 @@ const fixedImages: string[] = [
             mixFactor={targetMix}
             colors={colors} 
             inputRef={inputRef} 
-            userImages={userImages}
+            userImages={fixedImages}
             signatureText={signatureText}
         />
       </div>
