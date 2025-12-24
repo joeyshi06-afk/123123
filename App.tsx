@@ -26,21 +26,23 @@ const fixedImages: string[] = [
   "/photos/6.png",
   "/photos/7.png",
   "/photos/8.png",
+  "/photos/9.png",
+  "/photos/10.png",
 ];
 
 
   // Signature Modal State
-  const [isSignatureOpen, setIsSignatureOpen] = useState(false);
-  const [signatureText, setSignatureText] = useState("");
-  const [activePhotoUrl, setActivePhotoUrl] = useState<string | null>(null);
+   [isSignatureOpen, setIsSignatureOpen] = useState(false);
+   [signatureText, setSignatureText] = useState("");
+   [activePhotoUrl, setActivePhotoUrl] = useState<string | null>(null);
 
   // Camera Gui Visibility
-  const [showCamera, setShowCamera] = useState(true);
+   [showCamera, setShowCamera] = useState(true);
 
   // Wrap in useCallback to prevent new function creation on every render
-  const handleGesture = useCallback((data: HandGesture) => {
+   handleGesture = useCallback((data: HandGesture) => {
     if (data.isDetected) {
-        const newTarget = data.isOpen ? 0 : 1;
+         newTarget = data.isOpen ? 0 : 1;
         setTargetMix(prev => {
             if (prev !== newTarget) return newTarget;
             return prev;
@@ -133,9 +135,9 @@ const fixedImages: string[] = [
           <div className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-black/90 backdrop-blur-md transition-all duration-500 animate-in fade-in">
               <div className="relative w-16 h-16 mb-6">
                   {/* Outer Ring */}
-                  <div className="absolute inset-0 border-2 border-t-[#d4af37] border-r-transparent border-b-[#d4af37] border-l-transparent rounded-full animate-spin"></div>
+                  <div className="absolute inset-0 border-2 border-t-[#d4af37] border-r- border-b-[#d4af37] border-l- rounded-full animate-spin"></div>
                   {/* Inner Ring */}
-                  <div className="absolute inset-2 border-2 border-t-transparent border-r-white/30 border-b-transparent border-l-white/30 rounded-full animate-spin-reverse"></div>
+                  <div className="absolute inset-2 border-2 border-t- border-r-white/30 border-b- border-l-white/30 rounded-full animate-spin-reverse"></div>
                   {/* Center Star */}
                   <div className="absolute inset-0 flex items-center justify-center text-[#d4af37] text-xl animate-pulse">✦</div>
               </div>
@@ -163,7 +165,7 @@ const fixedImages: string[] = [
                 // Silver Metallic Gradient
                 background: 'linear-gradient(to bottom, #ffffff 20%, #e8e8e8 50%, #b0b0b0 90%)',
                 WebkitBackgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
+                WebkitTextFillColor: '',
                 // 3D Depth Shadows + Glow
                 filter: 'drop-shadow(0px 5px 5px rgba(0,0,0,0.8)) drop-shadow(0px 0px 20px rgba(255,255,255,0.4))'
             }}
@@ -220,7 +222,7 @@ const fixedImages: string[] = [
                         placeholder="Sign here..."
                         value={signatureText}
                         onChange={(e) => setSignatureText(e.target.value)}
-                        className="w-full text-center bg-transparent border-none outline-none font-script text-3xl md:text-4xl text-[#1a1a1a] placeholder:text-gray-300/50"
+                        className="w-full text-center bg- border-none outline-none font-script text-3xl md:text-4xl text-[#1a1a1a] placeholder:text-gray-300/50"
                         style={{ transform: 'translateY(-5px) rotate(-1deg)' }}
                         maxLength={20}
                       />
