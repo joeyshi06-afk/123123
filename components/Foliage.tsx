@@ -1,8 +1,13 @@
-
 import React, { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { generateFoliageData, lerp } from '../utils/math';
+
+// 解决 React 19 JSX 类型识别问题
+const Points = 'points' as any;
+const BufferGeometry = 'bufferGeometry' as any;
+const BufferAttribute = 'bufferAttribute' as any;
+const ShaderMaterial = 'shaderMaterial' as any;
 
 const vertexShader = `
   precision highp float;
@@ -20,12 +25,10 @@ const vertexShader = `
 
   void main() {
     vRandom = aRandom;
-    vIsSnow = step(0.85, aRandom); // Top 15% random values become snow
+    vIsSnow = step(0.85, aRandom); 
 
-    // Interpolate position
     vec3 pos = mix(aChaosPos, aTargetPos, uMix);
     
-    // Breathing effect
     float breath = sin(uTime + pos.y * 0.5) * 0.05 * uMix;
     pos.x += pos.x * breath;
     pos.z += pos.z * breath;
@@ -35,7 +38,6 @@ const vertexShader = `
     vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
     gl_Position = projectionMatrix * mvPosition;
     
-    // Size attenuation
     gl_PointSize = uSize * (20.0 / -mvPosition.z) * (0.6 + 0.8 * aRandom);
   }
 `;
@@ -50,45 +52,25 @@ const fragmentShader = `
   varying float vIsSnow;
 
   void main() {
-    // Exact height normalization for tree (-9 to 9)
-    float h = (vPos.y + 9.0) / 18.0;
-    h = clamp(h, 0.0, 1.0);
-    
-    // Mix gradient
+    float h = clamp((vPos.y + 9.0) / 18.0, 0.0, 1.0);
     vec3 color = mix(uColorBottom, uColorTop, h);
-    
-    // Depth Variation
     color *= 0.6 + 0.6 * vRandom;
-
-    // Apply Snow
-    // If vIsSnow is 1.0, mix with white
+    
     vec3 snowColor = vec3(0.95, 0.98, 1.0);
-    color = mix(color, snowColor, vIsSnow * 0.9); // 90% white blend
+    color = mix(color, snowColor, vIsSnow * 0.9);
 
-    // Circular particle
     float dist = length(gl_PointCoord - vec2(0.5));
     if (dist > 0.5) discard;
     
-    // Soft edge
     float alpha = 1.0 - smoothstep(0.3, 0.5, dist);
-
     gl_FragColor = vec4(color, alpha);
   }
 `;
 
-interface FoliageProps {
-  mixFactor: number; 
-  colors: { bottom: string, top: string };
-}
-
-const Foliage: React.FC<FoliageProps> = ({ mixFactor, colors }) => {
-  // RESTORED: Full particle count for high fidelity on all devices
+const Foliage: React.FC<{ mixFactor: number; colors: { bottom: string; top: string } }> = ({ mixFactor, colors }) => {
   const count = 75000; 
-  
   const materialRef = useRef<THREE.ShaderMaterial>(null);
-  
   const currentMixRef = useRef(1);
-  
   const { target, chaos, randoms } = useMemo(() => generateFoliageData(count, 18, 7.5), [count]);
 
   const uniforms = useMemo(() => ({
@@ -101,46 +83,23 @@ const Foliage: React.FC<FoliageProps> = ({ mixFactor, colors }) => {
 
   useFrame((state, delta) => {
     if (materialRef.current) {
-      const speed = 2.0 * delta; 
-      currentMixRef.current = lerp(currentMixRef.current, mixFactor, speed);
-
+      currentMixRef.current = lerp(currentMixRef.current, mixFactor, 2.0 * delta);
       materialRef.current.uniforms.uTime.value = state.clock.elapsedTime;
       materialRef.current.uniforms.uMix.value = currentMixRef.current;
-      
       materialRef.current.uniforms.uColorBottom.value.set(colors.bottom);
       materialRef.current.uniforms.uColorTop.value.set(colors.top);
     }
   });
 
   return (
-    <points>
-      <bufferGeometry>
-        <bufferAttribute
-          attach="attributes-position"
-          count={count}
-          array={target} 
-          itemSize={3}
-        />
-        <bufferAttribute
-          attach="attributes-aTargetPos"
-          count={count}
-          array={target}
-          itemSize={3}
-        />
-        <bufferAttribute
-          attach="attributes-aChaosPos"
-          count={count}
-          array={chaos}
-          itemSize={3}
-        />
-        <bufferAttribute
-          attach="attributes-aRandom"
-          count={count}
-          array={randoms}
-          itemSize={1}
-        />
-      </bufferGeometry>
-      <shaderMaterial
+    <Points>
+      <BufferGeometry>
+        <BufferAttribute attach="attributes-position" count={count} array={target} itemSize={3} />
+        <BufferAttribute attach="attributes-aTargetPos" count={count} array={target} itemSize={3} />
+        <BufferAttribute attach="attributes-aChaosPos" count={count} array={chaos} itemSize={3} />
+        <BufferAttribute attach="attributes-aRandom" count={count} array={randoms} itemSize={1} />
+      </BufferGeometry>
+      <ShaderMaterial
         ref={materialRef}
         vertexShader={vertexShader}
         fragmentShader={fragmentShader}
@@ -148,7 +107,7 @@ const Foliage: React.FC<FoliageProps> = ({ mixFactor, colors }) => {
         transparent
         depthWrite={false}
       />
-    </points>
+    </Points>
   );
 };
 
