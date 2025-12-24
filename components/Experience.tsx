@@ -242,7 +242,7 @@ const SceneController: React.FC<{
 const SceneContent: React.FC<ExperienceProps> = ({ mixFactor, colors, inputRef, userImages, signatureText }) => {
   const groupRef = useRef<THREE.Group>(null);
   
-  const photoCount = (userImages && userImages.length > 0) ? userImages.length : 10;
+  const photoCount = (userImages && userImages.length > 0) ? userImages.length : 0;
 
   return (
     <>
